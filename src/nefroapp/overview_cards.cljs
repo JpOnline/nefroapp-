@@ -1,6 +1,7 @@
 (ns nefroapp.overview-cards
   (:require
     [devcards.core :as devcards :refer-macros [defcard deftest defcard-rg]]
+    [Button :as material-button]
     ))
 
 ;; Draw the devcards ui.
@@ -11,6 +12,10 @@
   {}
   {:frame false
    :heading false})
+
+(defcard-rg x
+  [:> material-button
+   "Teste"])
 
 ;; (defonce devcards-hidden (reagent/atom []))
 ;;

@@ -1,5 +1,4 @@
-{
-  ;; :npm {:bundles {"dist/index.bundle.js" "src/js/index.js"}}
+{:npm {:bundles {"dist/index.bundle.js" "src/js/index.js"}}
  :connect-url "ws://penguin.linux.test:[[server-port]]/figwheel-connect"
  :watch-dirs ["src"]
  :open-url false
