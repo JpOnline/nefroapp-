@@ -38,7 +38,51 @@
     <!-- <meta name="msapplication&#45;TileImage" content="images/manifest/icon&#45;144x144.png"> -->
     <!-- <meta name="msapplication&#45;TileColor" content="#c9c92d"> -->
     <!-- <meta name="msapplication&#45;tap&#45;highlight" content="no"> -->
-  </head>
+
+    <style id="com-rigsomelight-devcards-addons-css">
+          /* full width code examples */
+
+          body {
+            overflow-x: hidden;
+          }
+
+          @media (max-width: 1000px) {
+            .com-rigsomelight-devcards-card-hide-border
+            .com-rigsomelight-devcards_rendered-card
+            .com-rigsomelight-devcards-markdown pre {
+              margin-right: -3000px;
+              margin-left: -3000px;
+              padding-right: 3000px;
+              padding-left: 3000px;
+            }
+          }
+
+          /* default typography */
+          /* .com-rigsomelight-devcards_rendered-card { */
+          /*   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; */
+          /*   font-size: 16px; */
+          /*   line-height: 1.42857143; */
+          /* } */
+
+          .com-rigsomelight-devcards_rendered-card code {
+            font-size: 90%;
+          }
+
+          /* .com-rigsomelight-devcards_rendered-card h1, */
+          /* .com-rigsomelight-devcards_rendered-card h2, */
+          /* .com-rigsomelight-devcards_rendered-card h3, */
+          /* .com-rigsomelight-devcards_rendered-card h4, */
+          /* .com-rigsomelight-devcards_rendered-card h5 { */
+          /*   font-weight: 500; */
+          /*     color: red; */
+          /* } */
+
+          /* .com-rigsomelight-devcards_rendered-card a { */
+          /*   color: #428bca; */
+          /*   text-decoration: none; */
+          /* } */
+    </style>
+</head>
   <body style="font-family: Roboto, sans-serif">
     <!-- This is for when lein fig is called with dev.cljs.edn -->
     <script src="cljs-out/dev-main-cards.js" type="text/javascript"></script>
