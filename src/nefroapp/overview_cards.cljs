@@ -263,8 +263,8 @@
   {:hidden? (reagent/atom false)}
   {:frame false})
 
-(defcard-rg lista-pacientes-card
-  (fn [devcard-data _]
+(defn card-component [& children]
+  (fn card-component [devcard-data _]
     (let [{:keys [hidden?]} @devcard-data]
       (swap! devcards-hidden conj hidden?)
       [:<>
@@ -277,29 +277,18 @@
        [:div.card-container
         {:style #js {:display "flex"}}
         [error-boundary
-         {:if-error [:h1 "Erro"]}
+         {:if-error [:h1 "Erro no card-component. 🤔"]}
          [:div.component-container
           {:hidden @hidden?}
-          [lista-pacientes/component]]]]]))
+          (map-indexed #(with-meta %2 {:key %1}) children)]]]])))
+
+(defcard-rg lista-pacientes-card
+  (card-component
+    [lista-pacientes/component])
   {:hidden? (reagent/atom false)})
 
 (defcard-rg receita-card
-  (fn [devcard-data _]
-    (let [{:keys [hidden?]} @devcard-data]
-      (swap! devcards-hidden conj hidden?)
-      [:<>
-       [:div.card-expander
-        {:onClick #(swap! hidden? not)
-         :style #js {:textAlign "center"}}
-        (if @hidden?
-          [:> mui-icon-expand-more]
-          [:> mui-icon-expand-less])]
-       [:div.card-container
-        {:style #js {:display "flex"}}
-        [error-boundary
-         {:if-error [:h1 "Erro"]}
-         [:div.component-container
-          {:hidden @hidden?}
-          [receita/component]]]]]))
+  (card-component
+    [receita/component])
   {:hidden? (reagent/atom false)})
 
