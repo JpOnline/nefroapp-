@@ -4,6 +4,7 @@
     [IconButton :as material-icon-button]
     [ChevronLeftIcon :as mui-icon-chevron-left]
     [ChevronRightIcon :as mui-icon-chevron-right]
+    [nefroapp.telas.shell-components :as shell]
     ;; [List :as material-list]
     ;; [ListItem :as material-list-item]
     ;; [ListItemText :as material-list-item-text]
@@ -94,3 +95,7 @@
              :alignItems "center"}}
     [input-medicamento]
     [repetir-medicamento-button]]])
+
+(defn view []
+  [shell/default
+   [component]])
