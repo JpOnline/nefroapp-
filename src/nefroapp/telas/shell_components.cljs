@@ -1,6 +1,7 @@
 (ns nefroapp.telas.shell-components
   "Reúne componentes básicos comuns a maioria das telas."
   (:require
+    [ArrowBack :as mui-icon-arrow-back]
     [IconButton :as material-icon-button]
     [MenuItem :as material-menu-item]
     [MenuList :as material-menu-list]
@@ -11,6 +12,42 @@
     [re-frame.core :as re-frame]
     [reagent.core :as reagent]
     ))
+
+(defn title
+  [screen-state]
+  (case screen-state
+    "pacientes" "Pacientes"
+    "receita" "Receita do Anderson Siqueira"
+    "??"))
+(re-frame/reg-sub
+  ::title
+  :<- [:nefroapp.telas.routing/state]
+  ;; :<- [::paciente-info/selected-patient]
+  title)
+
+(defn top-bar-left-icon
+  [screen-state]
+  (case screen-state
+    "pacientes" ""
+    "receita" "<-"
+    ""))
+(re-frame/reg-sub
+  ::top-bar-left-icon
+  :<- [:nefroapp.telas.routing/state]
+  top-bar-left-icon)
+
+(defn actions
+  [screen-state]
+  (case screen-state
+    "pacientes" [{:name "Novo Paciente" :event [:novo-paciente]}]
+    "receita" [{:name "Imprimir" :event [:imprimir-receita]}
+            {:name "Excluir Receita" :event [:excluir-receita]}
+            {:name "Excluir Paciente" :event [:excluir-paciente]}]
+    [{:name "Sem ações pra essa tela"}]))
+(re-frame/reg-sub
+  ::actions
+  :<- [:nefroapp.telas.routing/state]
+  actions)
 
 (defn error-boundary []
   (let [error (reagent/atom nil)]
@@ -141,33 +178,27 @@
     :onClick #(>evt [::open-actions-menu])}
    [:> mui-icon-more-vert]])
 
-(defn left-icon []
-  #_[:> material-icon-button
-   {:color "inherit"
-    ;; :onClick #(>evt [:back]) ;; TODO: use sub to know which event to use
-    }
-   [:> mui-icon-arrow-back]]
-  [:div.left-icon-placeholder
-   {:style {:width "48px"}}]
+(defn left-icon [{:keys [variation]}]
+  (case variation
+    "<-" [:> material-icon-button
+          {:color "inherit"
+           ;; :onClick #(>evt [:back]) ;; TODO: use sub to know which event to use
+           }
+          [:> mui-icon-arrow-back]]
+    [:div.left-icon-placeholder
+     {:style {:width "48px"}}])
   )
 
 (defn default [& children]
   [main-panel
    [actions-menu
-    {:actions [{:name "Novo Paciente"}
-               {:name "Ação 1"}
-               {:name "Ação 2"}
-               {:name "Ação 3"}
-               {:name "Ação 4"}
-               ]}
-    ]
+    {:actions (<sub [::actions])}]
    [header
-    [left-icon]
+    [left-icon
+     {:variation (<sub [::top-bar-left-icon])}]
     [top-bar
-     [screen-title "Pacientes"]]
-    [actions-menu-icon]
-    ]
+     [screen-title (<sub [::title])]]
+    [actions-menu-icon]]
    [main-content
-    (map-indexed #(with-meta %2 {:key %1}) children)]
-   ])
+    (map-indexed #(with-meta %2 {:key %1}) children)]])
 

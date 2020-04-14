@@ -4,6 +4,7 @@
     [ListItem :as material-list-item]
     [ListItemText :as material-list-item-text]
     [SearchIcon :as mui-icon-search]
+    [nefroapp.telas.shell-components :as shell]
     ))
 
 (defn component []
@@ -27,3 +28,7 @@
                               :secondary "Receita editada em: 03/02/2020"
                               }]]))]]
   )
+
+(defn view []
+  [shell/default
+   [component]])

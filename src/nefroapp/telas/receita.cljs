@@ -77,7 +77,7 @@
    {:style {:marginLeft "10px"}
     :variant "contained"
     :size "small"}
-   "Repetir Anterior"])
+   "Repetir"])
 
 (defn component []
   [:<>
