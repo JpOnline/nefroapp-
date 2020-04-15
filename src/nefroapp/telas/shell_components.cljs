@@ -91,7 +91,8 @@
    {:style #js {:minHeight 64
                 :padding "0 24px"
                 :display "flex"
-                :alignItems "center"}}
+                :alignItems "center"
+                :minWidth 0}}
    (map-indexed #(with-meta %2 {:key %1}) children)])
 
 (defn screen-title [& title-strs]
@@ -100,7 +101,10 @@
                 :fontWeight 500
                 :lineHeight 1.6
                 :letterSpacing "0.0075em"
-                :margin 0}}
+                :margin 0
+                :whiteSpace "nowrap"
+                :overflow "hidden"
+                :textOverflow "ellipsis"}}
    title-strs])
 
 (defn footer []
