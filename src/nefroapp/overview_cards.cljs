@@ -18,6 +18,7 @@
     [clojure.spec.gen.alpha :as gen]
     [clojure.test.check.generators] ;; Is it necessary?
     [clojure.spec.alpha :as spec]
+    [clojure.spec.gen.alpha :as gen]
     ))
 
 (defn reset-state!
@@ -35,11 +36,14 @@
    {:pacientes
     [{:id 0
       :nome "João Paulo Soares"
-      :receitas '({:criada-em "2020-04-13T11:07:38.106-03:00[SYSTEM]"
+      :receitas '({:criada-em "2020-04-19T11:07:38.106-03:00[SYSTEM]"
                    :editada-em "2020-04-13T11:07:38.106-03:00[SYSTEM]"
-                   :farmacos [{:nome "Hidróxido de Ferro"
-                               :prescricao "100ml"}]})}]}
-   :ui {:screen-state "pacientes"}})
+                   :farmacos {"Hidróxido de Ferro" {:prescricao "100ml"}}}
+                  {:criada-em "2020-02-14T11:07:38.106-03:00[SYSTEM]"
+                   :editada-em "2020-04-13T11:07:38.106-03:00[SYSTEM]"
+                   :farmacos {"Hidróxido de Ferro" {:prescricao "2"}}}
+                  )}]}
+   :ui {:screen-state "receita"}})
 
 (defonce init-app-state
   (do
@@ -187,8 +191,7 @@
 ;; ---------- SPECS for app-state ----------
   (spec/def ::prescricao #{"125ml" "250ml" "600ml" "Infundir 300ml (Máximo: 600ml)" "300mg - 3 vezes por semana" "6mg" "500ml/min" "300ml/min" "Via oral: 0,25-0,5µg/dia" "Via oral: 0,5-1µg 3 vezes por semana" "0,5-1µg de 2-3 vezes por semana" "Via intravenosa: 1-4µg, 3 vezes por semana, após a diálise"})
   (spec/def :farmaco/nome #{"Hidróxido de Ferro" "Eritropoetina" "Heparina" "Darbepoietina" "Enoxaparina" "Manitol" "Amido Hidroxietílico" "Gabapentina" "Dexclorfeniramina" "Calcitriol"})
-  (spec/def ::farmaco (spec/keys :req-un [:farmaco/nome ::prescricao]))
-  (spec/def ::farmacos (spec/coll-of ::farmaco :kind vector? :max-count 8))
+  (spec/def ::farmacos (spec/map-of :farmaco/nome (spec/keys :req-un [::prescricao])))
   (def zoned-date-time-regex #"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}")
   (spec/def ::zoned-date-time (spec/and string? #(re-find zoned-date-time-regex %)))
   (spec/def ::editada-em ::zoned-date-time)
@@ -203,14 +206,19 @@
   (spec/def ::domain (spec/keys :req-un [::pacientes]))
   (spec/def ::app-state (spec/keys :req-un [::domain ::ui]))
 
+  ;; (defn farmacos-gen []
+  ;;   (gen/fmap #(vec (map (comp first second) (group-by :nome %)))
+  ;;     (spec/gen ::farmacos)))
+
   (defn zoned-date-time-gen []
     (gen/fmap
       (fn [{:keys [d m]}]
-        (str (tick/+ (tick/zoned-date-time "2019-01-01T06:00:00.000-03:00[SYSTEM]") (tick/new-period d :days) (tick/new-duration m :millis))))
+        (str (tick/+ (tick/zoned-date-time "2018-04-19T06:00:00.000-03:00[SYSTEM]") (tick/new-period d :days) (tick/new-duration m :millis))))
       (gen/hash-map :d (gen/choose 0 730) :m (gen/choose 0 64700000)))) ;; 2 anos e 17 horas no máximo
 
 (comment
   (nefroapp.overview-cards/reset-state! nefroapp.overview-cards/initial-state)
   (gen/generate (spec/gen ::app-state {::zoned-date-time zoned-date-time-gen}))
-  (nefroapp.overview-cards/reset-state! (gen/generate (spec/gen ::app-state {::zoned-date-time zoned-date-time-gen})))
+  (nefroapp.overview-cards/reset-state! (gen/generate (spec/gen ::app-state {;; ::farmacos farmacos-gen
+                                                                             ::zoned-date-time zoned-date-time-gen})))
   )
