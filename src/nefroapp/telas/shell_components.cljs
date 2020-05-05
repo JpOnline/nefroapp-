@@ -1,12 +1,12 @@
 (ns nefroapp.telas.shell-components
   "Reúne componentes básicos comuns a maioria das telas."
   (:require
-    [ArrowBack :as mui-icon-arrow-back]
-    [IconButton :as material-icon-button]
-    [MenuItem :as material-menu-item]
-    [MenuList :as material-menu-list]
-    [MoreVert :as mui-icon-more-vert]
-    [Paper :as material-paper]
+    [arrow-back :as mui-icon-arrow-back]
+    [icon-button :as material-icon-button]
+    [menu-item :as material-menu-item]
+    [menu-list :as material-menu-list]
+    [more-vert :as mui-icon-more-vert]
+    [paper :as material-paper]
     [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
     [nefroapp.util :as util :refer [<sub >evt]]
     [re-frame.core :as re-frame]
@@ -122,17 +122,18 @@
      :height 40}]])
 
 (defn main-content [& children]
-  [:main
+  [:div
    {:style {:overflow "auto"
-            :display "flex"
-            :flexDirection "column"
             :height "100%"}}
-   [:div.main-content
-    {:style {:flexGrow 1
-             :padding 12}}
-    [error-boundary
-     {:if-error [:h1 "Erro main-content"]} ;; TODO: replace error-view
-     (map-indexed #(with-meta %2 {:key %1}) children)]]
+   [:main
+    {:style {:overflow "auto"
+             :height "100%"}}
+    [:div.main-content
+     {:style {:flexGrow 1
+              :padding 12}}
+     [error-boundary
+      {:if-error [:h1 "Erro main-content"]} ;; TODO: replace error-view
+      (map-indexed #(with-meta %2 {:key %1}) children)]]]
    [footer]])
 
 (defn-traced open-actions-menu
@@ -182,16 +183,20 @@
     :onClick #(>evt [::open-actions-menu])}
    [:> mui-icon-more-vert]])
 
+(defn-traced back
+  [app-state]
+  (assoc-in app-state [:ui :screen-state] "pacientes"))
+(re-frame/reg-event-db :back back)
+
 (defn left-icon [{:keys [variation]}]
   (case variation
     "<-" [:> material-icon-button
           {:color "inherit"
-           ;; :onClick #(>evt [:back]) ;; TODO: use sub to know which event to use
+           :onClick #(>evt [:back]) ;; TODO: Colocar na state machine uma opção alternativa pra aceitar um evento ao invés de só a tela pra qual vai. Ou colocar um reg-sub assim como é feito com o actions.
            }
           [:> mui-icon-arrow-back]]
     [:div.left-icon-placeholder
-     {:style {:width "48px"}}])
-  )
+     {:style {:width "48px"}}]))
 
 (defn default [& children]
   [main-panel
@@ -204,5 +209,7 @@
      [screen-title (<sub [::title])]]
     [actions-menu-icon]]
    [main-content
-    (map-indexed #(with-meta %2 {:key %1}) children)]])
+    (map-indexed #(with-meta %2 {:key %1}) children)]
+   
+   ])
 

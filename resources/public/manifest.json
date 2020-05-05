@@ -1,0 +1,17 @@
+{
+  "name": "Nefro App",
+  "start_url": "/nefroapp/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "images/manifest/android-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/manifest/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

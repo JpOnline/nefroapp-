@@ -1,8 +1,8 @@
 (ns nefroapp.overview-cards
   (:require
-    [Button :as material-button]
-    [ExpandLess :as mui-icon-expand-less]
-    [ExpandMore :as mui-icon-expand-more]
+    [button :as material-button]
+    [expand-less :as mui-icon-expand-less]
+    [expand-more :as mui-icon-expand-more]
     [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
     [devcards.core :as devcards :refer-macros [defcard deftest defcard-rg]]
     [nefroapp.telas.lista-pacientes :as lista-pacientes]
@@ -18,7 +18,6 @@
     [clojure.spec.gen.alpha :as gen]
     [clojure.test.check.generators] ;; Is it necessary?
     [clojure.spec.alpha :as spec]
-    [clojure.spec.gen.alpha :as gen]
     ))
 
 (defn reset-state!
@@ -216,7 +215,16 @@
         (str (tick/+ (tick/zoned-date-time "2018-04-19T06:00:00.000-03:00[SYSTEM]") (tick/new-period d :days) (tick/new-duration m :millis))))
       (gen/hash-map :d (gen/choose 0 730) :m (gen/choose 0 64700000)))) ;; 2 anos e 17 horas no máximo
 
+(defn x [] 2)
+;; TODO: delete this temporary function
+(defn t1 []
+  (nefroapp.overview-cards/reset-state!
+    (gen/generate
+      (spec/gen ::app-state {;; ::farmacos farmacos-gen
+                             ::zoned-date-time zoned-date-time-gen}))))
+
 (comment
+  (in-ns 'nefroapp.overview-cards)
   (nefroapp.overview-cards/reset-state! nefroapp.overview-cards/initial-state)
   (gen/generate (spec/gen ::app-state {::zoned-date-time zoned-date-time-gen}))
   (nefroapp.overview-cards/reset-state! (gen/generate (spec/gen ::app-state {;; ::farmacos farmacos-gen

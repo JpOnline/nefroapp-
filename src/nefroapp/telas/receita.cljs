@@ -1,9 +1,9 @@
 (ns nefroapp.telas.receita
   (:require
-    [Button :as material-button]
-    [ChevronLeftIcon :as mui-icon-chevron-left]
-    [ChevronRightIcon :as mui-icon-chevron-right]
-    [IconButton :as material-icon-button]
+    [button :as material-button]
+    [chevron-left-icon :as mui-icon-chevron-left]
+    [chevron-right-icon :as mui-icon-chevron-right]
+    [icon-button :as material-icon-button]
     [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
     [nefroapp.domain.receita-historico :as receita-historico]
     [nefroapp.telas.shell-components :as shell]
@@ -44,7 +44,7 @@
         receitas (get-in app-state [:domain :pacientes paciente-selecionado :receitas])
         sorted-receitas (reverse (sort-by :criada-em receitas)) ;; TODO: Precisa ordenar? Avaliar.
 
-        get-date #(second (re-find #"(\d{4}\D\d{1,2}\D\d{1,2})" %))
+        get-date #(second (when % (re-find #"(\d{4}\D\d{1,2}\D\d{1,2})" %)))
         tem-receita-de-hoje? (= (get-date (today))
                                 (get-date (:criada-em (first sorted-receitas))))
 
@@ -215,11 +215,14 @@
          {:onClick #(>evt [::set-todays-receita nome historico-selecionado])}])]]))
 
 (defn component []
-  [:<>
+  [:div
+   {:style {:overflowX "hidden"}}
+   (when (empty? (<sub [::farmacos-lista]))
+     [:h3 "Nenhum medicamento cadastrado ainda."])
    (for [farmaco (<sub [::farmacos-lista])]
-     ^{:key (:nome farmaco)} [farmaco-component
-                              {:farmaco farmaco}
-                              ])])
+     ^{:key (:nome farmaco)}
+     [farmaco-component
+      {:farmaco farmaco}])])
 
 (defn view []
   [shell/default
