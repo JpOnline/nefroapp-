@@ -137,9 +137,7 @@
   (let [idx-selecionado (or ((<sub [::receita-historico-selecionado]) nome) 0)
         last-idx (dec (count historico))
         idx-- (max (dec idx-selecionado) 0)
-        idx++ (+ 2 idx-selecionado)
-        _ (js/console.log "hhh" nome idx-- idx++)
-        ]
+        idx++ (+ 2 idx-selecionado)]
     [:div
      {:style {:transform "translateY(-5px)"
               :position "relative"}}
@@ -180,7 +178,7 @@
             :borderRadius "8px"
             :width "100%"
             :padding "0px 3px"}}
-   [:paper-textarea
+   [:nefroapp-textarea
     {:style {:width "100%"
              :marginTop "-18px"}
      :placeholder "Prescrição de hoje"

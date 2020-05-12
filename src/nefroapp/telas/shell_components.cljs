@@ -118,7 +118,7 @@
                 :zIndex 1100
                 :alignItems "center"}}
    [:img
-    {:src "images/logoimagem-consultoria.webp"
+    {:src "images/logoimagem-consultoria.png"
      :height 40}]])
 
 (defn main-content [& children]

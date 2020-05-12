@@ -13,6 +13,7 @@ window["ReactDOM"] = ReactDOM;
 // import '@vaadin/vaadin-date-picker/vaadin-date-picker.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-input/paper-textarea.js';
+import '../nefroapp/telas/nefroapp-textarea.js';
 // import '@polymer/paper-checkbox/paper-checkbox.js';
 
 // import NumberFormat from 'react-number-format';
