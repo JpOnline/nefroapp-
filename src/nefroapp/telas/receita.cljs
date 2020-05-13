@@ -41,7 +41,7 @@
 
 (defn get-paciente-selecionado-receitas [app-state]
   (let [paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)
-        receitas (get-in app-state [:domain :pacientes paciente-selecionado :receitas])
+        receitas (get-in app-state [:domain :pacientes paciente-selecionado :receitas] nil)
         sorted-receitas (reverse (sort-by :criada-em receitas)) ;; TODO: Precisa ordenar? Avaliar.
 
         get-date #(second (when % (re-find #"(\d{4}\D\d{1,2}\D\d{1,2})" %)))
@@ -73,6 +73,7 @@
         paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)]
     (-> app-state
         (assoc-in [:ui :receita :editando farmaco-nome] false)
+        (assoc-in [:ui :receita :on-focus farmaco-nome] false)
         (assoc-in [:domain :pacientes paciente-selecionado :receitas]
                   (conj sorted-receitas
                         updated-todays-receita)))))
@@ -112,21 +113,21 @@
            :position "absolute"
            :transform "translateX(-200%)"
            :clipPath "inset(0px 0px 0px 200%)"
-           :transition "1s ease-out"})
+           :transition "0.7s linear"})
 
 (def middle {:display "flex"
              :marginBottom "7px"
              :transform "translateX(0px)"
              :position "absolute"
              :clipPath "inset(0px)"
-             :transition "1s ease-in"})
+             :transition "0.7s linear"})
 
 (def right {:display "flex"
             :marginBottom "7px"
             :position "absolute"
             :transform "translateX(200%)"
             :clipPath "inset(0px 200% 0px 0px)"
-            :transition "1s ease-out"}) ;; TODO: Animação ainda não está boa.
+            :transition "0.7s linear"}) ;; TODO: Animação ainda não está muito boa.
 
 (defn titulo-farmaco [titulo]
   [:h3
@@ -137,7 +138,7 @@
   (let [idx-selecionado (or ((<sub [::receita-historico-selecionado]) nome) 0)
         last-idx (dec (count historico))
         idx-- (max (dec idx-selecionado) 0)
-        idx++ (+ 2 idx-selecionado)]
+        idx++ (min (+ 2 idx-selecionado) (count historico))]
     [:div
      {:style {:transform "translateY(-5px)"
               :position "relative"}}
@@ -155,7 +156,7 @@
             :onClick #(>evt [::select-history-value-before nome last-idx])}
            [:> mui-icon-chevron-left]])
         [:p {:style {:color "gray"}}
-         (nth historico idx)]
+         (nth historico idx nil)]
         (when (> idx 0)
           [:> material-icon-button
            {:color "inherit"
@@ -172,7 +173,7 @@
                }}
       (nth historico idx-selecionado)]]))
 
-(defn input-farmaco [{:keys [value onBlur]}]
+(defn input-farmaco [{:keys [value onBlur onClick]}]
   [:div
    {:style {:border "1px solid #BDBDBD"
             :borderRadius "8px"
@@ -183,26 +184,39 @@
              :marginTop "-18px"}
      :placeholder "Prescrição de hoje"
      :value value
+     :onClick onClick
      :onBlur onBlur}]])
 
-(defn repetir-farmaco-button [{:keys [onClick]}]
+(defn farmaco-button [{:keys [onClick]} text]
   [:> material-button
    {:style {:marginLeft "10px"}
     :onClick onClick
     :variant "contained"
     :size "small"}
-   "Repetir"])
+   text])
 
-(defn input-line [{:keys [prescricao-de-hoje nome historico-selecionado]}]
+(defn set-input-focus
+  [app-state [event farmaco-nome value]]
+  ;; TODO: Refatorar para colocar os farmacos num map que pode dar merge no
+  ;; farmaco do domain.
+  (assoc-in app-state [:ui :receita :on-focus farmaco-nome] value))
+(re-frame/reg-event-db ::set-input-focus set-input-focus)
+
+(defn on-focus?
+  [app-state]
+  ;; TODO: Refatorar quando puder dar merge no farmaco domain e ui
+  (get-in app-state [:ui :receita :on-focus] {}))
+(re-frame/reg-sub ::on-focus? on-focus?)
+
+(defn input-field [{:keys [prescricao-de-hoje nome historico-selecionado]} button]
   [:div
    {:style {:display "flex"
             :alignItems "center"}}
    [input-farmaco
     {:value prescricao-de-hoje
+     :onClick #(>evt [::set-input-focus nome true])
      :onBlur #(>evt [::set-todays-receita nome (-> % .-target .-value)])}]
-   (when (empty? prescricao-de-hoje)
-     [repetir-farmaco-button
-      {:onClick #(>evt [::set-todays-receita nome historico-selecionado])}])])
+   button])
 
 (defn edit-farmaco
   [app-state [event farmaco-nome]]
@@ -240,18 +254,36 @@
      [titulo-farmaco nome]
      ;; TODO: Colocar essa lógica do "and" num único reg-sub quando for
      ;; possível dar merge nos farmacos do domain e ui.
-     (if (and prescricao-de-hoje (not ((<sub [::editando?]) nome)))
-       [prescricao-hoje-line
-        {:prescricao-de-hoje prescricao-de-hoje
-         :nome nome}]
-       [:<>
-        [historico-farmaco
+     (cond
+       ;; TODO: Preciso indicar de alguma outra forma quando a prescrição é vazia?
+       (and prescricao-de-hoje (not= prescricao-de-hoje "") (not ((<sub [::editando?]) nome)))
+         [prescricao-hoje-line
+          {:prescricao-de-hoje prescricao-de-hoje
+           :nome nome}]
+       ((<sub [::on-focus?]) nome)
+         [:<>
+          [historico-farmaco
            {:historico historico
             :nome nome}]
-        [input-line
+          [input-field
            {:prescricao-de-hoje prescricao-de-hoje
             :nome nome
-            :historico-selecionado historico-selecionado}]])]))
+            :historico-selecionado historico-selecionado}
+           [farmaco-button
+            {}
+            "Ok"]]]
+       :else
+         [:<>
+          [historico-farmaco
+           {:historico historico
+            :nome nome}]
+          [input-field
+           {:prescricao-de-hoje prescricao-de-hoje
+            :nome nome
+            :historico-selecionado historico-selecionado}
+           [farmaco-button
+            {:onClick #(>evt [::set-todays-receita nome historico-selecionado])}
+            "Repetir"]]])]))
 
 (defn component []
   [:div

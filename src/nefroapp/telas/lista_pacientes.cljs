@@ -15,6 +15,18 @@
   (assoc-in app-state [:ui :screen-state] "receita"))
 (re-frame/reg-event-db ::select-paciente select-paciente)
 
+(defn pacientes-e-receitas-data
+  [app-state]
+  (let [pacientes (get-in app-state [:domain :pacientes] {})
+        ultima-fn (fn [{:keys [receitas]}]
+                    (->> receitas
+                         (map :editada-em)
+                         sort
+                         last
+                         util/yyyy-mm-dd->dd-mm-yyyy))]
+    (map #(assoc % :ultima-receita-editada (ultima-fn %)) pacientes)))
+(re-frame/reg-sub ::pacientes-e-receitas-data pacientes-e-receitas-data)
+
 (defn component []
   [:<>
    [:paper-input
@@ -24,18 +36,21 @@
      ;; :onFocus #(>evt [::clear-errors])
      ;; :value (<sub [::email])
      ;; :onBlur #(>evt [::set-login-property :email (-> % .-target .-value)])
-     }
+     :onClick #(js/alert "😑 Funcionalidade não disponível ainda.")}
     [:> mui-icon-search
      {:slot "suffix"}]]
    [:> material-list
-   (map-indexed #(with-meta %2 {:key %1})
-                (repeat 2 [:> material-list-item
-                            {:button true
-                             :onClick #(>evt [::select-paciente])}
-                            [:> material-list-item-text
-                             {:primary "Waldemiro"
-                              :secondary "Receita editada em: 03/02/2020"}]]))]]
-  )
+    (when (empty? (<sub [::pacientes-e-receitas-data]))
+      [:p "Sem pacientes cadastrados ainda."])
+    (for [{:keys [id nome ultima-receita-editada]}
+          (<sub [::pacientes-e-receitas-data])]
+      ^{:key id}
+      [:> material-list-item
+       {:button true
+        :onClick #(>evt [::select-paciente])}
+       [:> material-list-item-text
+        {:primary nome
+         :secondary (str "Receita editada em: "ultima-receita-editada)}]])]])
 
 (defn view []
   [shell/default

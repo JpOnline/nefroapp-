@@ -1,0 +1,4 @@
+{:main nefroapp.main
+ :npm-deps false
+ :infer-externs true
+ :closure-defines {goog.DEBUG false}}

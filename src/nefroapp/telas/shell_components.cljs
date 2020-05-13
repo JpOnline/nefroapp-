@@ -36,6 +36,30 @@
   :<- [:nefroapp.telas.routing/state]
   top-bar-left-icon)
 
+(defn-traced novo-paciente
+  [app-state]
+  (js/alert "😑 Funcionalidade não disponível ainda.")
+  app-state)
+(re-frame/reg-event-db :novo-paciente novo-paciente)
+
+(defn-traced imprimir-receita
+  [app-state]
+  (js/alert "😑 Funcionalidade não disponível ainda.")
+  app-state)
+(re-frame/reg-event-db :imprimir-receita imprimir-receita)
+
+(defn-traced excluir-receita
+  [app-state]
+  (js/alert "😑 Funcionalidade não disponível ainda.")
+  app-state)
+(re-frame/reg-event-db :excluir-receita excluir-receita)
+
+(defn-traced excluir-paciente
+  [app-state]
+  (js/alert "😑 Funcionalidade não disponível ainda.")
+  app-state)
+(re-frame/reg-event-db :excluir-paciente excluir-paciente)
+
 (defn actions
   [screen-state]
   (case screen-state
@@ -173,7 +197,7 @@
         (map (fn [action]
                ^{:key (action :name)}
                [:> material-menu-item
-                ;; {:onClick #(>evt [(action :event)])}
+                {:onClick #(>evt (action :event))}
                 (action :name)])
              actions)]]])])
 
@@ -210,6 +234,5 @@
     [actions-menu-icon]]
    [main-content
     (map-indexed #(with-meta %2 {:key %1}) children)]
-   
    ])
 
