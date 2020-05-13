@@ -143,7 +143,7 @@
      {:style {:transform "translateY(-5px)"
               :position "relative"}}
      (for [idx (range idx-- idx++)]
-       ^{:key idx}
+       ^{:key (str nome idx)}
        [:div
         (condp #(%1 %2 idx) idx-selecionado
             < {:style left}
