@@ -167,7 +167,7 @@
 
 (defcard-rg lista-pacientes-card
   (card-component
-    [lista-pacientes/component])
+    [lista-pacientes/component-l])
   {:hidden? (reagent/atom false)})
 
 (defcard-rg receita-card
