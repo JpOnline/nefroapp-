@@ -44,7 +44,7 @@
 
 (defn-traced imprimir-receita
   [app-state]
-  (js/alert "😑 Funcionalidade não disponível ainda.")
+  (js/window.print)
   app-state)
 (re-frame/reg-event-db :imprimir-receita imprimir-receita)
 

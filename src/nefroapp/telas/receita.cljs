@@ -285,6 +285,65 @@
             {:onClick #(>evt [::set-todays-receita nome historico-selecionado])}
             "Repetir"]]])]))
 
+(defn a4-grid []
+  [:<>
+   (map (fn [top]
+          ^{:key top}
+          [:div
+           {:style {:top (str top "mm")
+                    :position "absolute"
+                    :width "210mm"
+                    :height "1px"
+                    :backgroundColor "gray"
+                    }}])
+        [26 (+ 26 245)])
+   (map (fn [left]
+          ^{:key left}
+          [:div
+           {:style {:left (str left "mm")
+                    :position "absolute"
+                    :width "1px"
+                    :height "297mm"
+                    :backgroundColor "gray"
+                    }}])
+        [30 (+ 30 150)])])
+
+(defn printing-component []
+  (let [top-margin 25
+        bottom-margin (+ 26 245)
+        left-margin 30
+        right-margin (+ 30 150)]
+    [:div
+     {:style {:position "relative"
+              "WebkitPrintColorAdjust" "exact"}}
+     [a4-grid]
+     [:div
+      {:style {:position "absolute"
+               :left (str left-margin"mm")
+               :top "25mm"
+               :fontWeight "bold"}}
+      [:div
+       {:style {:display "flex"
+                :alignItems "center"
+                :width "150mm"
+                :placeContent "center"}}
+       [:img
+        {:src "images/logo-hospital.png"
+         :style {:width "26.7mm"}}]
+       [:h4 "SERVIÇO DE NEFROLOGIA DE MATÃO"]
+       [:img
+        {:src "images/imagem-rim.png"
+         :style {:width "13mm"}}]]
+       [:u [:h3
+            {:style {:textAlign "center"}}
+            "PRESCRIÇÃO DE HEMODIÁLISE - FEVEREIRO DE 2020"]] ;; TODO: Mudar a data
+       [:h2 "PACIENTE: JAQUELINE ELIZIARIO"] ;; TODO: Mudar o dado
+       [:p "TEMPO: 4 HORAS"] ;; TODO: Mudar o dado
+      ]]))
+
+(defn printing-view []
+  [:div#show-only-on-printing [printing-component]])
+
 (defn component []
   [:div
    {:style {:overflowX "hidden"}}
@@ -295,8 +354,26 @@
      [farmaco-component
       {:farmaco farmaco}])])
 
+(defn hide-on-print-style []
+  [:style
+   (str
+     "#show-only-on-printing {
+       display: none;
+     }
+     @media print {
+       #show-only-on-printing ~ * {"
+         "display: none !important;
+       }
+       #show-only-on-printing {
+         display: block;
+       }
+     }")])
+
 (defn view []
-  [shell/default
-   [shell/error-boundary
-    {:if-error [:h1 "Erro receita"]} ;; TODO: replace error-view
-    [component]]])
+  [:<>
+   [hide-on-print-style]
+   [printing-view]
+   [shell/default
+    [shell/error-boundary
+     {:if-error [:h1 "Erro receita"]} ;; TODO: replace error-view
+     [component]]]])

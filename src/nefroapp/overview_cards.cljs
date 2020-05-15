@@ -146,6 +146,45 @@
   {:hidden? (reagent/atom false)}
   {:frame false})
 
+(defcard-rg printing-receita-card
+  (fn [devcard-data _]
+    (let [{:keys [hidden?]} @devcard-data]
+      (swap! devcards-hidden conj hidden?)
+      [:<>
+       [:div
+        {:style #js {:display "flex"
+                     :justifyContent "space-evenly"
+                     :padding "15px 0"}}
+        [:div
+         [:div
+          {:class "com-rigsomelight-devcards-panel-heading com-rigsomelight-devcards-typog"
+           :style #js {:width "90vw"}}
+          [:a
+           {:href "#"
+            :style #js {:color "#666"}}
+           "printing-receita-card"]]]]
+       [:div.card-expander
+        {:onClick #(swap! hidden? not)
+         :style #js {:textAlign "center"}}
+        (if @hidden?
+          [:> mui-icon-expand-more]
+          [:> mui-icon-expand-less])]
+       [:div
+        {:style #js {:display "flex"
+                     :justifyContent "space-evenly"}}
+        [:div
+         [:div.card-container
+          {:style #js {:width "96vw"}}
+          [shell/error-boundary
+           {:if-error [:h1 "Erro na visualização de impressão. 🤔"]}
+           [:div.component-container
+            {:hidden @hidden?
+             :style #js {:width "210mm" :height "297mm"
+                         :border "1px solid #00000038"}}
+            [receita/printing-component]]]]]]]))
+  {:hidden? (reagent/atom true)}
+  {:frame false})
+
 (defn card-component [& children]
   (fn card-component [devcard-data _]
     (let [{:keys [hidden?]} @devcard-data]
@@ -167,7 +206,7 @@
 
 (defcard-rg lista-pacientes-card
   (card-component
-    [lista-pacientes/component-l])
+    [lista-pacientes/component])
   {:hidden? (reagent/atom false)})
 
 (defcard-rg receita-card
