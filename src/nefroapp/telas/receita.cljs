@@ -310,17 +310,17 @@
 
 (defn printing-component []
   (let [top-margin 25
-        bottom-margin (+ 26 245)
-        left-margin 30
-        right-margin (+ 30 150)]
+        ;; bottom-margin (+ 26 245)
+        ;; right-margin (+ 30 150)
+        left-margin 30]
     [:div
      {:style {:position "relative"
               "WebkitPrintColorAdjust" "exact"}}
-     [a4-grid]
+     ;; [a4-grid]
      [:div
       {:style {:position "absolute"
                :left (str left-margin"mm")
-               :top "25mm"
+               :top (str top-margin"mm")
                :fontWeight "bold"}}
       [:div
        {:style {:display "flex"
@@ -334,12 +334,32 @@
        [:img
         {:src "images/imagem-rim.png"
          :style {:width "13mm"}}]]
-       [:u [:h3
-            {:style {:textAlign "center"}}
-            "PRESCRIÇÃO DE HEMODIÁLISE - FEVEREIRO DE 2020"]] ;; TODO: Mudar a data
-       [:h2 "PACIENTE: JAQUELINE ELIZIARIO"] ;; TODO: Mudar o dado
-       [:p "TEMPO: 4 HORAS"] ;; TODO: Mudar o dado
-      ]]))
+      [:u [:h3
+           {:style {:textAlign "center"}}
+           "PRESCRIÇÃO DE HEMODIÁLISE - FEVEREIRO DE 2020"]] ;; TODO: Mudar a data
+      [:h2 "PACIENTE: JAQUELINE ELIZIARIO"] ;; TODO: Mudar o dado
+      [:div {:style {:fontSize "10pt"}}
+       [:p "UF Máxima: 3500 ML"]
+       [:p "Temperatura: 36°C"]
+       [:p "Tempo: 4 HORAS"] ;; TODO: Mudar o dado
+       [:p "Ca: 3 meq/L"]
+       [:p "Glicose: sim"]
+       [:p "Capilar: Elisio 21 H"]
+       [:p "Peso Seco: 61,5 KG"]
+       [:p "Fluxo de Sangue: 400 ml/min"]
+       [:p "Fluxo de Dialisato: 500 ml/min"]
+       [:p "Na: 138 meq/L"]
+       [:p "Acesso Vascular: Cateter de longa permanência em VJID"]
+       [:p "Heparina: 1,2 ml"]
+       [:p "BIC: -4"]
+       [:p "KCL: 2,0  meq/L"]
+       ]
+      [:div {:style {:width "150mm"
+                     :fontSize "10pt"
+                     :textAlign "center"
+                     :marginTop "64px"}}
+       [:div "Rodrigo Santana Gonçalves da Silva"]
+       [:div "CRM 145719"]]]]))
 
 (defn printing-view []
   [:div#show-only-on-printing [printing-component]])
