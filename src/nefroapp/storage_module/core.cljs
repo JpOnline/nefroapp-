@@ -12,7 +12,7 @@
     {:id 0,
      :nome "Paciente Exemplo",
      :receitas
-     '({:criada-em "2020-05-16T18:11:17.998-03:00[SYSTEM]",
+     [{:criada-em "2020-05-16T18:11:17.998-03:00[SYSTEM]",
        :editada-em "2020-05-17T10:35:57.080-02:00[SYSTEM]",
        :farmacos
        {"Tempo" {:prescricao "4 HORAS"},
@@ -79,7 +79,7 @@
          "BIC" {:prescricao "-4"}
          "Temperatura" {:prescricao "36°C"}
          "Heparina" {:prescricao "1,0 ml"}
-         "UF Máxima" {:prescricao "3500 ML"}}})}]}
+         "UF Máxima" {:prescricao "3500 ML"}}}]}]}
    :ui {:screen-state "pacientes"}})
 
 (re-frame/reg-event-db ::update-domain-or-init

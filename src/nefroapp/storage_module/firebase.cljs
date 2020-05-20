@@ -20,10 +20,10 @@
     (-> fb (.database))))
 
 (defn save! [path value]
-  (let [json (clj->js value {:keyword-fn str})]
+  (let [json (clj->js value)]
     (assert
-      (do (js/console.log "compare" value (js->clj json :keywordize-keys false))
-          (= value (js->clj json :keywordize-keys false)))
+      (do (js/console.log "compare" value (js->clj json :keywordize-keys true))
+          (= value (js->clj json :keywordize-keys true)))
       "The given map is different if converted back from JSON.")
     (-> firebase-db (.ref path)
         (.set json #(when % (js/console.log "Erro ao gravar no Firebase." %))))))
@@ -33,7 +33,7 @@
      (fn [snapshot]
        (callback-fn (some-> snapshot
                             (.val)
-                            (js->clj :keywordize-keys false))))
+                            (js->clj :keywordize-keys true))))
      (fn [error]
        (js/console.log "Erro ao ler dados do Firebase." error)))))
 
