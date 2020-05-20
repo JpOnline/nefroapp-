@@ -236,3 +236,15 @@
     (map-indexed #(with-meta %2 {:key %1}) children)]
    ])
 
+(defn loading []
+  [main-panel
+   [actions-menu
+    {:actions (<sub [::actions])}]
+   [header
+    [left-icon
+     {:variation ""}]
+    [top-bar
+     [screen-title "Carregando"]]
+    [actions-menu-icon]]
+   [main-content
+    [:h3 "Carregando..."]]])

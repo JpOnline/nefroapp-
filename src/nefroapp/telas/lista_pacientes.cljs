@@ -55,3 +55,6 @@
 (defn view []
   [shell/default
    [component]])
+
+(defn loading []
+  [shell/loading])

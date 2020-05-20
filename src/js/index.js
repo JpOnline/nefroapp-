@@ -5,10 +5,11 @@ import ReactDOM from 'react-dom';
 window["React"] = React;
 window["ReactDOM"] = ReactDOM;
 
-// import * as firebase from 'firebase/app';
-// import 'firebase/auth';
-// import 'firebase/database';
-// window["firebase"] = firebase;
+import * as firebase from 'firebase/app';
+import "firebase/analytics";
+import 'firebase/auth';
+import 'firebase/database';
+window["firebase"] = firebase;
 
 // import '@vaadin/vaadin-date-picker/vaadin-date-picker.js';
 import '@polymer/paper-input/paper-input.js';

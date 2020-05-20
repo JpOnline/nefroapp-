@@ -6,6 +6,7 @@
 
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.597"]
+                 [com.cognitect/transit-cljs "0.8.264"]
 
                  ;; Has calendar dates, without times and timezones.
                  [tick "0.4.23-alpha"]

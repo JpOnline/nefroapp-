@@ -13,5 +13,6 @@
 
 (defn selected-view []
   (case (<sub [::state])
+    "loading" [pacientes/loading]
     "pacientes" [pacientes/view]
     "receita" [receita/view]))
