@@ -75,7 +75,9 @@
         (assoc-in [:ui :receita :editando farmaco-nome] false)
         (assoc-in [:ui :receita :on-focus farmaco-nome] false)
         (assoc-in [:domain :pacientes paciente-selecionado :receitas]
-                  (conj sorted-receitas
+                  (conj (if (list? sorted-receitas)
+                          sorted-receitas
+                          (sort-by :criada-em sorted-receitas))
                         updated-todays-receita)))))
 (re-frame/reg-event-db ::set-todays-receita set-todays-receita)
 

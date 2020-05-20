@@ -19,11 +19,62 @@
       (-> fb (.initializeApp firebase-config)))
     (-> fb (.database))))
 
+(defn my-key->js [k]
+  (cond
+    (keyword? k) (str k)
+    (number? k) k
+    :default (clj->js k)))
+
+(defn my-clj->js [x]
+  (cond
+    (satisfies? IEncodeJS x) (my-clj->js x)
+    (keyword? x) (my-key->js x)
+    (map? x) (let [m (js-obj)]
+               (doseq [[k v] x]
+                 (goog.object/set m (my-key->js k) (my-clj->js v)))
+               m)
+    (coll? x) (let [arr (array)]
+                (doseq [x (map my-clj->js x)]
+                  (.push arr x))
+                arr)
+    :else (clj->js x)))
+
+(defn my-key->clj [k]
+  (cond
+    (= k (str (js/parseInt k))) (js/parseInt k)
+    (= ":" (first k)) (->> k rest (apply str) keyword)
+    :else k))
+
+(defn my-js->clj [x]
+  (cond
+    (satisfies? IEncodeClojure x)
+    (my-js->clj x)
+
+    (seq? x)
+    (doall (map my-js->clj x))
+
+    (map-entry? x)
+    (MapEntry. (my-js->clj (key x)) (my-js->clj (val x)) nil)
+
+    (coll? x)
+    (into (empty x) (map my-js->clj) x)
+
+    (array? x)
+    (persistent!
+      (reduce #(conj! %1 (my-js->clj %2))
+              (transient []) x))
+
+    (identical? (type x) js/Object)
+    (persistent!
+      (reduce (fn [r k] (assoc! r (my-key->clj k) (my-js->clj (goog.object/get x k))))
+              (transient {}) (js-keys x)))
+
+    :else x))
+
 (defn save! [path value]
-  (let [json (clj->js value {:keyword-fn str})]
+  (let [json (my-clj->js value)]
     (assert
-      (do (js/console.log "compare" value (js->clj json :keywordize-keys false))
-          (= value (js->clj json :keywordize-keys false)))
+      (= value (my-js->clj json))
       "The given map is different if converted back from JSON.")
     (-> firebase-db (.ref path)
         (.set json #(when % (js/console.log "Erro ao gravar no Firebase." %))))))
@@ -33,44 +84,6 @@
      (fn [snapshot]
        (callback-fn (some-> snapshot
                             (.val)
-                            (js->clj :keywordize-keys false))))
+                            (my-js->clj))))
      (fn [error]
        (js/console.log "Erro ao ler dados do Firebase." error)))))
-
-#_(re-frame/reg-event-fx
-  ::restore-domain-from-firebase
-  (fn-traced
-    [{:keys [db]} _]
-    (if-let [user (some-> fb .auth .-currentUser)]
-      (let [user-email (.-email user)
-            name-in-email (first (clojure.string/split user-email "@"))
-            user-fb-uid (.-uid user)]
-        (-> firebase-db
-            (.ref (str "users/"name-in-email"-"user-fb-uid))
-            (.once "value"
-                   (fn [snapshot]
-                     (re-frame/dispatch-sync
-                       [::restore-domain-from-firebase-callback snapshot]))))
-        {:db (assoc-in db [:ui :state] "loading")})
-      {:db (assoc-in db [:ui :state] "login")})))
-
-#_(re-frame/reg-event-fx
-  ::restore-domain-from-firebase-callback
-  (fn-traced
-    [_ [_ snapshot]]
-    (let [restored-from-firebase (some-> snapshot
-                                         (.val)
-                                         (js->clj :keywordize-keys true))
-          restored-state (merge restored-from-firebase
-                                initial-state/ui-initial-state
-                                {:authentication {:user-email (-> fb .auth .-currentUser .-email)}})
-          default-state (merge initial-state/domain-initial-state
-                               initial-state/ui-initial-state
-                               {:authentication {:user-email (-> fb .auth .-currentUser .-email)}})]
-      (if restored-from-firebase
-        {:db restored-state
-         :store restored-state}
-        (do
-          (js/console.log "Nenhum dado encontrado no firebase. Portanto o app-state foi reiniciado.")
-          {:db default-state
-           :store default-state})))))
