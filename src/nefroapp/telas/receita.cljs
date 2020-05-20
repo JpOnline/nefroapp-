@@ -3,19 +3,14 @@
     [button :as material-button]
     [chevron-left-icon :as mui-icon-chevron-left]
     [chevron-right-icon :as mui-icon-chevron-right]
-    [icon-button :as material-icon-button]
     [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
+    [icon-button :as material-icon-button]
     [nefroapp.domain.receita-historico :as receita-historico]
+    [nefroapp.storage-module.core :as storage-module]
     [nefroapp.telas.shell-components :as shell]
     [nefroapp.util :as util :refer [<sub >evt]]
     [re-frame.core :as re-frame]
     [tick.alpha.api :as tick]
-    ;; [List :as material-list]
-    ;; [ListItem :as material-list-item]
-    ;; [ListItemText :as material-list-item-text]
-    ;; [SearchIcon :as mui-icon-search]
-
-    [reagent.core :as reagent]
     ))
 
 (defn-traced select-history-value-before
@@ -37,7 +32,7 @@
   ::receita-historico-selecionado
   receita-historico-selecionado)
 
-(defn today [] "2020-04-23T13:13:23.826-03:00[SYSTEM]" #_(str (tick/zoned-date-time)))
+(defn today [] (str (tick/zoned-date-time)))
 
 (defn get-paciente-selecionado-receitas [app-state]
   (let [paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)
@@ -70,15 +65,17 @@
                                  {:criada-em (today)
                                   :editada-em (today)
                                   :farmacos (assoc-in farmacos-sem-prescricao [farmaco-nome :prescricao] new-value)})
-        paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)]
-    (-> app-state
-        (assoc-in [:ui :receita :editando farmaco-nome] false)
-        (assoc-in [:ui :receita :on-focus farmaco-nome] false)
-        (assoc-in [:domain :pacientes paciente-selecionado :receitas]
-                  (conj (if (list? sorted-receitas)
-                          sorted-receitas
-                          (sort-by :criada-em sorted-receitas))
-                        updated-todays-receita)))))
+        paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)
+        updated-state (-> app-state
+                          (assoc-in [:ui :receita :editando farmaco-nome] false)
+                          (assoc-in [:ui :receita :on-focus farmaco-nome] false)
+                          (assoc-in [:domain :pacientes paciente-selecionado :receitas]
+                                    (conj (if (list? sorted-receitas)
+                                            sorted-receitas
+                                            (sort-by :criada-em sorted-receitas))
+                                          updated-todays-receita)))]
+    (storage-module/save-or-restore-domain! (:domain updated-state))
+    updated-state))
 (re-frame/reg-event-db ::set-todays-receita set-todays-receita)
 
 (defn farmacos-lista
