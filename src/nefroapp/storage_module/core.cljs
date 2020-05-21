@@ -8,8 +8,8 @@
     ))
 
 (def initial-state
-  {:domain {:pacientes [
-    {:id 0,
+  {:domain {:pacientes {
+    -1 {:id -1, ;; Se começar do zero o firebase vai resgatar o valor como array e não como map.
      :nome "Paciente Exemplo",
      :receitas
      '({:criada-em "2020-05-16T18:11:17.998-03:00[SYSTEM]",
@@ -79,7 +79,7 @@
          "BIC" {:prescricao "-4"}
          "Temperatura" {:prescricao "36°C"}
          "Heparina" {:prescricao "1,0 ml"}
-         "UF Máxima" {:prescricao "3500 ML"}}})}]}
+         "UF Máxima" {:prescricao "3500 ML"}}})}}}
    :ui {:screen-state "pacientes"}})
 
 (re-frame/reg-event-db ::update-domain-or-init
@@ -93,14 +93,15 @@
 
 ;; ------ The save ------
 
-(defn save-or-restore-domain! [value]
+(defn save-or-restore-domain! [{value :domain :as app-state}]
   ;; Only save data if there's already data in the local-storage, otherwise
   ;; restore from the firebase. If both are empty them save data in both
   (if (local-storage/get-item "domain")
     (do (local-storage/set-item! "domain" value)
         (firebase/save! "domain" value))
     (do (js/console.log "Não tinha :domain no Local Storage ao tentar salvar, ignorando save e tentando resgatar do Firebase.")
-        (>evt [::load-domain-from-local-storage]))))
+        (>evt [::load-domain-from-local-storage])))
+  app-state)
 
 ;; ------ The load ------
 

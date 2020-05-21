@@ -33,7 +33,7 @@
 (def initial-state
   {:domain
    {:pacientes
-    [{:id 0
+    {-1 {:id 0
       :nome "João Paulo Soares"
       :receitas '({:criada-em "2020-04-19T11:07:38.106-03:00[SYSTEM]"
                    :editada-em "2020-04-13T11:07:38.106-03:00[SYSTEM]"
@@ -41,7 +41,7 @@
                   {:criada-em "2020-02-14T11:07:38.106-03:00[SYSTEM]"
                    :editada-em "2020-04-13T11:07:38.106-03:00[SYSTEM]"
                    :farmacos {"Hidróxido de Ferro" {:prescricao "2"}}}
-                  )}]}
+                  )}}}
    :ui {:screen-state "receita"}})
 
 (defonce init-app-state
@@ -239,7 +239,7 @@
   (spec/def ::nome #{"Waldomiro Donaire" "Raul Araujo" "Anderson Siqueira" "Marcos Silva" "Fernanda Ramos" "Roberta Lima" "João Alves" "Rodrigo Pereira" "Aline Ribeiro" "Abel Tavares" "Sandra Castro"})
   (spec/def ::id nat-int?)
   (spec/def ::paciente (spec/keys :req-un [::id ::nome ::receitas]))
-  (spec/def ::pacientes (spec/coll-of ::paciente :kind vector? :max-count 2))
+  (spec/def ::pacientes (spec/coll-of ::paciente :kind vector? :max-count 2)) ;; TODO: update
   (spec/def ::ui #{{:screen-state "receita"}})
   (spec/def ::domain (spec/keys :req-un [::pacientes]))
   (spec/def ::app-state (spec/keys :req-un [::domain ::ui]))

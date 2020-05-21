@@ -32,15 +32,13 @@
   ::receita-historico-selecionado
   receita-historico-selecionado)
 
-(defn today [] (str (tick/zoned-date-time)))
-
 (defn get-paciente-selecionado-receitas [app-state]
   (let [paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)
         receitas (get-in app-state [:domain :pacientes paciente-selecionado :receitas] nil)
         sorted-receitas (reverse (sort-by :criada-em receitas)) ;; TODO: Precisa ordenar? Avaliar.
 
         get-date #(second (when % (re-find #"(\d{4}\D\d{1,2}\D\d{1,2})" %)))
-        tem-receita-de-hoje? (= (get-date (today))
+        tem-receita-de-hoje? (= (get-date (util/today))
                                 (get-date (:criada-em (first sorted-receitas))))
 
         ;; Vou usar a receita de hoje para mostrar o valor de prescrição no input.
@@ -60,22 +58,21 @@
         farmacos-sem-prescricao (into {} (for [[farmaco-nome _] (:farmacos (first sorted-receitas))] {farmaco-nome {:prescricao ""}}))
         updated-todays-receita (if todays-receita
                                  (-> todays-receita
-                                     (assoc :editada-em (today))
+                                     (assoc :editada-em (util/today))
                                      (assoc-in [:farmacos farmaco-nome :prescricao] new-value))
-                                 {:criada-em (today)
-                                  :editada-em (today)
+                                 {:criada-em (util/today)
+                                  :editada-em (util/today)
                                   :farmacos (assoc-in farmacos-sem-prescricao [farmaco-nome :prescricao] new-value)})
-        paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)
-        updated-state (-> app-state
-                          (assoc-in [:ui :receita :editando farmaco-nome] false)
-                          (assoc-in [:ui :receita :on-focus farmaco-nome] false)
-                          (assoc-in [:domain :pacientes paciente-selecionado :receitas]
-                                    (conj (if (list? sorted-receitas)
-                                            sorted-receitas
-                                            (sort-by :criada-em sorted-receitas))
-                                          updated-todays-receita)))]
-    (storage-module/save-or-restore-domain! (:domain updated-state))
-    updated-state))
+        paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)]
+    (-> app-state
+        (assoc-in [:ui :receita :editando farmaco-nome] false)
+        (assoc-in [:ui :receita :on-focus farmaco-nome] false)
+        (assoc-in [:domain :pacientes paciente-selecionado :receitas]
+                  (conj (if (list? sorted-receitas)
+                          sorted-receitas
+                          (sort-by :criada-em sorted-receitas))
+                        updated-todays-receita))
+        storage-module/save-or-restore-domain!)))
 (re-frame/reg-event-db ::set-todays-receita set-todays-receita)
 
 (defn farmacos-lista
@@ -98,13 +95,17 @@
                                    (merge-with concat acc
                                                (farmacos->date-values-map criada-em farmacos)))
                                  {} sorted-receitas)]
-    (into [] (for [[farmaco-nome historico] farmacos-history]
+    (if (empty? farmacos-history)
+      (into  [] (for [[farmaco-nome {:keys [prescricao]}] (:farmacos todays-receita)]
+                  {:nome farmaco-nome
+                   :prescricao-de-hoje prescricao}))
+      (into [] (for [[farmaco-nome historico] farmacos-history]
                {:nome farmaco-nome
                 :historico (receita-historico/compact-history
-                             (today)
+                             (util/today)
                              historico)
                 :prescricao-de-hoje (some-> todays-receita :farmacos
-                                            (get farmaco-nome) :prescricao)}))))
+                                            (get farmaco-nome) :prescricao)})))))
 (re-frame/reg-sub ::farmacos-lista farmacos-lista)
 
 (def left {:display "flex"
@@ -244,11 +245,11 @@
 
 (defn farmaco-component [{{:keys [historico nome prescricao-de-hoje]} :farmaco}]
   (let [idx-selecionado (or ((<sub [::receita-historico-selecionado]) nome) 0)
-        historico-selecionado (as-> historico $
-                                  (nth $ idx-selecionado)
-                                  (clojure.string/split $ #"- ")
-                                  (rest $)
-                                  (clojure.string/join "- " $))]
+        historico-selecionado (when historico (as-> historico $
+                                                (nth $ idx-selecionado)
+                                                (clojure.string/split $ #"- ")
+                                                (rest $)
+                                                (clojure.string/join "- " $)))]
     [:<>
      [titulo-farmaco nome]
      ;; TODO: Colocar essa lógica do "and" num único reg-sub quando for
@@ -261,9 +262,10 @@
            :nome nome}]
        ((<sub [::on-focus?]) nome)
          [:<>
-          [historico-farmaco
-           {:historico historico
-            :nome nome}]
+          (when historico
+            [historico-farmaco
+             {:historico historico
+              :nome nome}])
           [input-field
            {:prescricao-de-hoje prescricao-de-hoje
             :nome nome
@@ -273,9 +275,10 @@
             "Ok"]]]
        :else
          [:<>
-          [historico-farmaco
-           {:historico historico
-            :nome nome}]
+          (when historico
+            [historico-farmaco
+             {:historico historico
+              :nome nome}])
           [input-field
            {:prescricao-de-hoje prescricao-de-hoje
             :nome nome

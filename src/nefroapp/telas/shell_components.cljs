@@ -36,23 +36,11 @@
   :<- [:nefroapp.telas.routing/state]
   top-bar-left-icon)
 
-(defn-traced novo-paciente
-  [app-state]
-  (js/alert "😑 Funcionalidade não disponível ainda.")
-  app-state)
-(re-frame/reg-event-db :novo-paciente novo-paciente)
-
 (defn-traced imprimir-receita
   [app-state]
   (js/window.print)
   app-state)
 (re-frame/reg-event-db :imprimir-receita imprimir-receita)
-
-(defn-traced excluir-receita
-  [app-state]
-  (js/alert "😑 Funcionalidade não disponível ainda.")
-  app-state)
-(re-frame/reg-event-db :excluir-receita excluir-receita)
 
 (defn-traced excluir-paciente
   [app-state]
@@ -63,10 +51,9 @@
 (defn actions
   [screen-state]
   (case screen-state
-    "pacientes" [{:name "Novo Paciente" :event [:novo-paciente]}]
-    "receita" [{:name "Imprimir" :event [:imprimir-receita]}
-            {:name "Excluir Receita" :event [:excluir-receita]}
-            {:name "Excluir Paciente" :event [:excluir-paciente]}]
+    "pacientes" [{:name "Novo Paciente" :event [:nefroapp.telas.lista-pacientes/novo-paciente]}]
+    "receita" [{:name "Imprimir" :event [::imprimir-receita]}
+               {:name "Excluir Paciente" :event [:excluir-paciente]}]
     [{:name "Sem ações pra essa tela"}]))
 (re-frame/reg-sub
   ::actions

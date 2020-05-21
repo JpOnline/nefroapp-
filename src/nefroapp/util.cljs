@@ -2,6 +2,7 @@
   (:require
     [re-frame.core :as re-frame]
     [reagent.dom]
+    [tick.alpha.api :as tick]
     ))
 
 ;; Redef re-frame subscribe and dispatch for brevity
@@ -31,3 +32,4 @@
       ;;finally, defines the component with these values
       (js/window.customElements.define name component))))
 
+(defn today [] (str (tick/zoned-date-time)))

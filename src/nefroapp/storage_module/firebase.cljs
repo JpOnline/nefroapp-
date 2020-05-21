@@ -71,11 +71,18 @@
 
     :else x))
 
+(defn assert-it-will-be-the-same-when-retrieved [value]
+  (let [f2 (my-clj->js value)
+        f3 (my-js->clj f2)]
+    (when (not= value f3)
+      (do (js/console.log "value" value)
+          (js/console.log "(my-clj->js value)" f2)
+          (js/console.log "(my-js->clj (my-clj->js value))" f3)
+          (throw (js/Error. "The given map is different if converted back from JSON."))))))
+
 (defn save! [path value]
   (let [json (my-clj->js value)]
-    (assert
-      (= value (my-js->clj json))
-      "The given map is different if converted back from JSON.")
+    (assert-it-will-be-the-same-when-retrieved value)
     (-> firebase-db (.ref path)
         (.set json #(when % (js/console.log "Erro ao gravar no Firebase." %))))))
 

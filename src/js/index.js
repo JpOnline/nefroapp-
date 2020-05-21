@@ -168,7 +168,7 @@ window["LinearProgress"] = LinearProgress;
 import Link from '@material-ui/core/Link';
 window["Link"] = Link;
 import List from '@material-ui/core/List';
-window["List"] = List;
+window["MaterialList"] = List;
 import ListItem from '@material-ui/core/ListItem';
 window["ListItem"] = ListItem;
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
