@@ -118,3 +118,9 @@
       (do (js/console.log "Sem :domain no Local Storage, tentando no Firebase agora..")
           (firebase/async-load "domain" #(>evt [::update-domain-or-init %]))
           {:ui {:screen-state "loading"}}))))
+
+(defn register-firebase-load! []
+  (firebase/register-load! "domain"
+    (fn [snap-val]
+      (when (not= snap-val (local-storage/get-item "domain"))
+        (>evt [::update-domain-or-init snap-val])))))

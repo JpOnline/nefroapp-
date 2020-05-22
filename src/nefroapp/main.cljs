@@ -210,4 +210,5 @@
   (do
     (register-service-worker!)
     (init-state!)
+    (storage-module/register-firebase-load!)
     (mount-app-element!)))

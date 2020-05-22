@@ -3,7 +3,9 @@
     [re-frame.core :as re-frame]
     [reagent.dom]
     [tick.alpha.api :as tick]
-    ))
+    [cljs.core.async :as async]
+    )
+  (:require-macros [cljs.core.async.macros :as async-m]))
 
 ;; Redef re-frame subscribe and dispatch for brevity
 (def <sub (comp deref re-frame.core/subscribe))
@@ -33,3 +35,12 @@
       (js/window.customElements.define name component))))
 
 (defn today [] (str (tick/zoned-date-time)))
+
+(defn throttle-for-mutable-args [time f arg-capture-fn]
+  (let [c (async/chan (async/sliding-buffer 1))]
+    (async-m/go-loop []
+      (f (async/<! c))
+      (async/<! (async/timeout time))
+      (recur))
+    (fn [& args]
+      (async/put! c (apply arg-capture-fn (or args []))))))

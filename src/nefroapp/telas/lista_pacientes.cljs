@@ -9,6 +9,7 @@
     [nefroapp.util :as util :refer [<sub >evt]]
     [re-frame.core :as re-frame]
     [search-icon :as mui-icon-search]
+    [clojure.string :as str]
     ))
 
 (defn receita-padrao []
@@ -57,9 +58,29 @@
       (assoc-in [:ui :screen-state] "receita")))
 (re-frame/reg-event-db ::select-paciente select-paciente)
 
+(defn replace-accents [s]
+  (clojure.string/replace s #"[áâéêíóôãçõ]" {"á" "a"
+                                             "â" "a"
+                                             "é" "e"
+                                             "ê" "e"
+                                             "í" "i"
+                                             "ó" "o"
+                                             "ô" "o"
+                                             "ã" "a"
+                                             "ç" "c"
+                                             "õ" "o"}))
+
 (defn pacientes-e-receitas-data
   [app-state]
-  (let [pacientes (vals (get-in app-state [:domain :pacientes] {}))
+  (let [buscar-nome (get-in app-state [:ui :buscar-paciente] "")
+        sanitize-fn (comp replace-accents str/lower-case str/trim)
+        search-fn #(str/includes?
+                     (sanitize-fn (:nome %))
+                     (sanitize-fn buscar-nome))
+        pacientes (-> app-state
+                      (get-in [:domain :pacientes] {})
+                      (vals)
+                      (as-> ps (filter search-fn ps)))
         ultima-fn (fn [{:keys [receitas]}]
                     (->> receitas
                          (map :editada-em)
@@ -69,21 +90,39 @@
     (map #(assoc % :ultima-receita-editada (ultima-fn %)) pacientes)))
 (re-frame/reg-sub ::pacientes-e-receitas-data pacientes-e-receitas-data)
 
+(defn-traced set-buscar-paciente
+  [app-state [event s]]
+  (assoc-in app-state [:ui :buscar-paciente] s))
+(re-frame/reg-event-db ::set-buscar-paciente set-buscar-paciente)
+
+(defn get-buscar-paciente
+  [app-state]
+  (get-in app-state [:ui :buscar-paciente] ""))
+(re-frame/reg-sub ::get-buscar-paciente get-buscar-paciente)
+
+(defn input-buscar []
+  [:paper-input
+   {:style {:width "100%"
+            :marginTop "-18px"}
+    :label "Buscar"
+    :onInput (util/throttle-for-mutable-args
+               500
+               #(>evt [::set-buscar-paciente %])
+               #(-> % .-target .-value)) }
+   [:> mui-icon-search
+    {:slot "suffix"}]])
+
 (defn component []
   [:<>
-   [:paper-input
-    {:style {:width "100%"
-             :marginTop "-18px"}
-     :label "Buscar"
-     ;; :onFocus #(>evt [::clear-errors])
-     ;; :value (<sub [::email])
-     ;; :onBlur #(>evt [::set-login-property :email (-> % .-target .-value)])
-     :onClick #(js/alert "😑 Funcionalidade não disponível ainda.")}
-    [:> mui-icon-search
-     {:slot "suffix"}]]
+   [input-buscar]
    [:> material-list
-    (when (empty? (<sub [::pacientes-e-receitas-data]))
-      [:p "Sem pacientes cadastrados ainda."])
+    (cond
+      (and (empty? (<sub [::pacientes-e-receitas-data]))
+           (empty? (<sub [::get-buscar-paciente])))
+      [:p "Sem pacientes cadastrados ainda."] 
+
+      (empty? (<sub [::pacientes-e-receitas-data]))
+      [:p "Nenhum paciente com esse nome."])
     (for [{:keys [id nome ultima-receita-editada]}
           (<sub [::pacientes-e-receitas-data])]
       ^{:key id}

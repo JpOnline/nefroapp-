@@ -86,6 +86,16 @@
     (-> firebase-db (.ref path)
         (.set json #(when % (js/console.log "Erro ao gravar no Firebase." %))))))
 
+(defn register-load! [path callback-fn]
+  (-> firebase-db (.ref path) (.on "value"
+     (fn [snapshot]
+       (js/console.log "Carregando novos dados do Firebase.")
+       (callback-fn (some-> snapshot
+                            (.val)
+                            (my-js->clj))))
+     (fn [error]
+       (js/console.log "Erro ao ler dados do Firebase." error)))))
+
 (defn async-load [path callback-fn]
   (-> firebase-db (.ref path) (.once "value"
      (fn [snapshot]
