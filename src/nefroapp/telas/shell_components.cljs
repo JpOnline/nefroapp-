@@ -2,27 +2,28 @@
   "Reúne componentes básicos comuns a maioria das telas."
   (:require
     [arrow-back :as mui-icon-arrow-back]
+    [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
     [icon-button :as material-icon-button]
     [menu-item :as material-menu-item]
     [menu-list :as material-menu-list]
     [more-vert :as mui-icon-more-vert]
-    [paper :as material-paper]
-    [day8.re-frame.tracing :refer-macros [fn-traced defn-traced]]
+    [nefroapp.storage-module.core :as storage-module]
     [nefroapp.util :as util :refer [<sub >evt]]
+    [paper :as material-paper]
     [re-frame.core :as re-frame]
     [reagent.core :as reagent]
     ))
 
 (defn title
-  [screen-state]
+  [[screen-state paciente-selecionado]]
   (case screen-state
     "pacientes" "Pacientes"
-    "receita" "Receita do Anderson Siqueira"
+    "receita" (str "Receita de "(:nome paciente-selecionado))
     "??"))
 (re-frame/reg-sub
   ::title
   :<- [:nefroapp.telas.routing/state]
-  ;; :<- [::paciente-info/selected-patient]
+  :<- [:nefroapp.telas.receita/paciente-selecionado]
   title)
 
 (defn top-bar-left-icon
@@ -44,8 +45,15 @@
 
 (defn-traced excluir-paciente
   [app-state]
-  (js/alert "😑 Funcionalidade não disponível ainda.")
-  app-state)
+  (let [paciente-id (get-in app-state [:ui :paciente-selecionado])
+        paciente-nome (get-in app-state [:domain :pacientes paciente-id :nome])]
+    (if-not (js/confirm (str "Tem certeza que deseja excluir todas as informações de "paciente-nome"?"))
+      app-state
+      (-> app-state
+          (update-in [:domain :pacientes] dissoc paciente-id)
+          (assoc-in [:ui :screen-state] "pacientes")
+          (assoc-in [:ui :actions-menu :opened?] false)
+          (storage-module/save-or-restore-domain!)))))
 (re-frame/reg-event-db :excluir-paciente excluir-paciente)
 
 (defn actions

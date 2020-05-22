@@ -85,8 +85,9 @@
 (re-frame/reg-event-db ::update-domain-or-init
   (fn-traced [app-state [event domain-state]]
     (if domain-state
-      {:domain domain-state
-       :ui {:screen-state "pacientes"}}
+      (do (local-storage/set-item! "domain" domain-state)
+          {:domain domain-state
+           :ui {:screen-state "pacientes"}})
       (do (firebase/save! "domain" (:domain initial-state))
           (local-storage/set-item! "domain" (:domain initial-state))
           initial-state))))
@@ -100,7 +101,8 @@
     (do (local-storage/set-item! "domain" value)
         (firebase/save! "domain" value))
     (do (js/console.log "Não tinha :domain no Local Storage ao tentar salvar, ignorando save e tentando resgatar do Firebase.")
-        (>evt [::load-domain-from-local-storage])))
+        (firebase/async-load "domain" #(>evt [::update-domain-or-init %]))
+        (js/alert "Seus dados estavam desincronizados com o servidor\nPor favor tente de novo.")))
   app-state)
 
 ;; ------ The load ------

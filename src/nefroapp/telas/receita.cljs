@@ -13,6 +13,13 @@
     [tick.alpha.api :as tick]
     ))
 
+(defn-traced paciente-selecionado
+  [app-state]
+  (-> app-state
+      (get-in [:ui :paciente-selecionado])
+      (as-> id (get-in app-state [:domain :pacientes id]))))
+(re-frame/reg-sub ::paciente-selecionado paciente-selecionado)
+
 (defn-traced select-history-value-before
   [app-state [event farmaco-nome total]]
   (update-in app-state [:ui :receita :historico farmaco-nome]

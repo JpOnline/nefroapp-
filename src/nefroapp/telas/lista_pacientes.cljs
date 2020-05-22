@@ -51,8 +51,10 @@
 (re-frame/reg-event-db ::novo-paciente novo-paciente)
 
 (defn-traced select-paciente
-  [app-state]
-  (assoc-in app-state [:ui :screen-state] "receita"))
+  [app-state [event selected-id]]
+  (-> app-state
+      (assoc-in [:ui :paciente-selecionado] selected-id)
+      (assoc-in [:ui :screen-state] "receita")))
 (re-frame/reg-event-db ::select-paciente select-paciente)
 
 (defn pacientes-e-receitas-data
@@ -87,7 +89,7 @@
       ^{:key id}
       [:> material-list-item
        {:button true
-        :onClick #(>evt [::select-paciente])}
+        :onClick #(>evt [::select-paciente id])}
        [:> material-list-item-text
         {:primary nome
          :secondary (str "Receita editada em: "ultima-receita-editada)}]])]])
