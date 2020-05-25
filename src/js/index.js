@@ -4,12 +4,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 window["React"] = React;
 window["ReactDOM"] = ReactDOM;
+window["cljsjs.react"] = React;
+window["cljsjs.react-dom"] = ReactDOM;
+
+require('react-dom');
+window.React2 = require('react');
+console.log("React1 === React2", window.React1 === window.React2);
 
 import * as firebase from 'firebase/app';
 import "firebase/analytics";
 import 'firebase/auth';
 import 'firebase/database';
 window["firebase"] = firebase;
+// window["firebase-database"] = firebase.database;
 
 // import '@vaadin/vaadin-date-picker/vaadin-date-picker.js';
 import '@polymer/paper-input/paper-input.js';

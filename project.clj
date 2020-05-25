@@ -13,6 +13,7 @@
 
                  [re-frame "0.12.0"]
                  [reagent "0.10.0"]
+                 [binaryage/oops "0.7.0"]
 
                  ;; Should be production only
                  ;; [day8.re-frame/tracing-stubs "0.5.3"]

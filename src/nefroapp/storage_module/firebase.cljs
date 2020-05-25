@@ -1,6 +1,7 @@
 (ns nefroapp.storage-module.firebase
   (:require
-    [firebase :as fb]
+    [firebase]
+    [oops.core :as oops]
     ))
 
 (def firebase-config
@@ -15,9 +16,9 @@
 
 (def firebase-db
   (do
-    (when (= 0 (-> fb .-apps .-length))
-      (-> fb (.initializeApp firebase-config)))
-    (-> fb (.database))))
+    (when (= 0 js/firebase.apps.length)
+      (js/firebase.initializeApp firebase-config))
+    (js/firebase.database)))
 
 (defn my-key->js [k]
   (cond
@@ -82,8 +83,7 @@
 (defn async-load [path callback-fn]
   (-> firebase-db (.ref path) (.once "value"
      (fn [snapshot]
-       (callback-fn (some-> snapshot
-                            (.val)
+       (callback-fn (some-> (oops/ocall snapshot "val")
                             (my-js->clj))))
      (fn [error]
        (js/console.log "Erro ao ler dados do Firebase." error)))))
