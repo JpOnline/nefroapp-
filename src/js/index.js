@@ -4,6 +4,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 window["React"] = React;
 window["ReactDOM"] = ReactDOM;
+window["cljsjs.react"] = React;
+window["cljsjs.react-dom"] = ReactDOM;
+
+require('react-dom');
+window.React2 = require('react');
+console.log("React1 === React2", window.React1 === window.React2);
 
 import * as firebase from 'firebase/app';
 import "firebase/analytics";

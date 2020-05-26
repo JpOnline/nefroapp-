@@ -13,6 +13,7 @@
 
                  [re-frame "0.12.0"]
                  [reagent "0.10.0"]
+                 [binaryage/oops "0.7.0"]
 
                  ;; Should be production only
                  ;; [day8.re-frame/tracing-stubs "0.5.3"]
@@ -25,6 +26,8 @@
             "fig:cards-togithub"   ["run" "-m" "figwheel.main" "-O" "none" "-bo" "cards"]
             "fig:dev" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]
             "fig:none-prod" ["run" "-m" "figwheel.main" "-O" "none" "-bo" "prod"]
+            "fig:whitespace-prod" ["run" "-m" "figwheel.main" "-O" "whitespace" "-bo" "prod"]
+            "fig:simple-prod" ["run" "-m" "figwheel.main" "-O" "simple" "-bo" "prod"]
             "fig:prod" ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "prod"]}
 
   :profiles {:dev

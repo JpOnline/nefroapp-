@@ -41,7 +41,7 @@
   [app-state]
   (js/window.print)
   app-state)
-(re-frame/reg-event-db :imprimir-receita imprimir-receita)
+(re-frame/reg-event-db ::imprimir-receita imprimir-receita)
 
 (defn-traced excluir-paciente
   [app-state]
