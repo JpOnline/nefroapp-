@@ -317,6 +317,56 @@
                     }}])
         [30 (+ 30 150)])])
 
+(defn ultima-receita
+  [app-state]
+  (let [paciente-selecionado (get-in app-state [:ui :paciente-selecionado] 0)
+        receitas (get-in app-state [:domain :pacientes paciente-selecionado :receitas] nil)
+        sorted-receitas (reverse (sort-by :criada-em receitas))] ;; TODO: Precisa ordenar? Avaliar.
+    (first sorted-receitas)))
+(re-frame/reg-sub ::ultima-receita ultima-receita)
+
+(defn ultima-receita-mes
+  [ultima-receita]
+  (some->> ultima-receita
+      :criada-em
+      (re-find #"\d{4}\D(\d{1,2})\D\d{1,2}")
+      second
+      js/parseInt
+      {1 "JANEIRO" 2 "FEVEREIRO" 3 "MARÇO" 4 "ABRIL"
+       5 "MAIO" 6 "JUNHO" 7 "JULHO" 8 "AGOSTO" 9 "SETEMBRO"
+       10 "OUTUBRO" 11 "NOVEMBRO" 12 "DEZEMBRO"}))
+(re-frame/reg-sub
+  ::ultima-receita-mes
+  :<- [::ultima-receita]
+  ultima-receita-mes)
+
+(defn ultima-receita-ano
+  [ultima-receita]
+  (some->> ultima-receita
+      :criada-em
+      (re-find #"(\d{4})\D\d{1,2}\D\d{1,2}")
+      second))
+(re-frame/reg-sub
+  ::ultima-receita-ano
+  :<- [::ultima-receita]
+  ultima-receita-ano)
+
+(defn paciente-nome
+  [paciente-selecionado]
+  (:nome paciente-selecionado))
+(re-frame/reg-sub
+  ::paciente-nome
+  :<- [::paciente-selecionado]
+  paciente-nome)
+
+(defn ultima-receita-farmacos-prescricao
+  [ultima-receita]
+  (:farmacos ultima-receita))
+(re-frame/reg-sub
+  ::ultima-receita-farmacos-prescricao
+  :<- [::ultima-receita]
+  ultima-receita-farmacos-prescricao)
+
 (defn printing-component []
   (let [top-margin 25
         ;; bottom-margin (+ 26 245)
@@ -345,24 +395,15 @@
          :style {:width "13mm"}}]]
       [:u [:h3
            {:style {:textAlign "center"}}
-           "PRESCRIÇÃO DE HEMODIÁLISE - FEVEREIRO DE 2020"]] ;; TODO: Mudar a data
-      [:h2 "PACIENTE: JAQUELINE ELIZIARIO"] ;; TODO: Mudar o dado
+           (str "PRESCRIÇÃO DE HEMODIÁLISE - "
+                (<sub [::ultima-receita-mes])" DE "
+                (<sub [::ultima-receita-ano]))]]
+      [:h2 (str "PACIENTE: "(<sub [::paciente-nome]))]
       [:div {:style {:fontSize "10pt"}}
-       [:p "UF Máxima: 3500 ML"]
-       [:p "Temperatura: 36°C"]
-       [:p "Tempo: 4 HORAS"] ;; TODO: Mudar o dado
-       [:p "Ca: 3 meq/L"]
-       [:p "Glicose: sim"]
-       [:p "Capilar: Elisio 21 H"]
-       [:p "Peso Seco: 61,5 KG"]
-       [:p "Fluxo de Sangue: 400 ml/min"]
-       [:p "Fluxo de Dialisato: 500 ml/min"]
-       [:p "Na: 138 meq/L"]
-       [:p "Acesso Vascular: Cateter de longa permanência em VJID"]
-       [:p "Heparina: 1,2 ml"]
-       [:p "BIC: -4"]
-       [:p "KCL: 2,0  meq/L"]
-       ]
+       (for [[f {p :prescricao}]
+             (<sub [::ultima-receita-farmacos-prescricao])]
+         ^{:key f}
+         [:p (str f": "p)])]
       [:div {:style {:width "150mm"
                      :fontSize "10pt"
                      :textAlign "center"
