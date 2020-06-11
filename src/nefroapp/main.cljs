@@ -13,9 +13,14 @@
   (js/console.log "Debugger mode!"))
 
 (defn register-service-worker! []
-  (.addEventListener js/window "load" #(some-> js/navigator
-                                               .-serviceWorker
-                                               (.register "/nefroapp/sw.js"))))
+  (let [path (-> js/window .-location .-pathname)
+        sw-location (cond (= path "/nefroapp/") "/nefroapp/sw.js"
+                          (= path "/") "/sw.js"
+                          :else (do (js/console.warn "Ajustar path do service-worker!")
+                                    "/sw.js"))]
+    (.addEventListener js/window "load" #(some-> js/navigator
+                                                 .-serviceWorker
+                                                 (.register sw-location)))))
 
 (def initial-state
   {:domain {:pacientes {
