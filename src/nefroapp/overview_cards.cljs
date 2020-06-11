@@ -33,7 +33,7 @@
 (def initial-state
   {:domain
    {:pacientes
-    {-1 {:id 0
+    {-1 {:id -1
       :nome "João Paulo Soares"
       :receitas '({:criada-em "2020-04-19T11:07:38.106-03:00[SYSTEM]"
                    :editada-em "2020-04-13T11:07:38.106-03:00[SYSTEM]"

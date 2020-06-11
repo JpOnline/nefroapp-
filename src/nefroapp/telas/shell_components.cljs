@@ -126,19 +126,19 @@
                 :textOverflow "ellipsis"}}
    title-strs])
 
-(defn footer []
-  [:footer
-   {:style #js {:color "white"
-                :height 48
-                :background "radial-gradient(circle, rgba(251,251,251,1) -30%, #44736e 110%)"
-                :padding "0 24px"
-                :display "flex"
-                :justifyContent "center"
-                :zIndex 1100
-                :alignItems "center"}}
-   [:img
-    {:src "images/logoimagem-consultoria.png"
-     :height 40}]])
+;; (defn footer []
+;;   [:footer
+;;    {:style #js {:color "white"
+;;                 :height 48
+;;                 :background "radial-gradient(circle, rgba(251,251,251,1) -30%, #44736e 110%)"
+;;                 :padding "0 24px"
+;;                 :display "flex"
+;;                 :justifyContent "center"
+;;                 :zIndex 1100
+;;                 :alignItems "center"}}
+;;    [:img
+;;     {:src "images/logoimagem-consultoria.png"
+;;      :height 40}]])
 
 (defn main-content [& children]
   [:div
@@ -153,7 +153,7 @@
      [error-boundary
       {:if-error [:h1 "Erro main-content"]} ;; TODO: replace error-view
       (map-indexed #(with-meta %2 {:key %1}) children)]]]
-   [footer]])
+   #_[footer]]) ;; Tirei o footer pq ficava com 2 barras de rolagem.
 
 (defn-traced open-actions-menu
   [app-state]

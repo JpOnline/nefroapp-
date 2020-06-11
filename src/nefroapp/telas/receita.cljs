@@ -252,11 +252,12 @@
 
 (defn farmaco-component [{{:keys [historico nome prescricao-de-hoje]} :farmaco}]
   (let [idx-selecionado (or ((<sub [::receita-historico-selecionado]) nome) 0)
-        historico-selecionado (when historico (as-> historico $
-                                                (nth $ idx-selecionado)
-                                                (clojure.string/split $ #"- ")
-                                                (rest $)
-                                                (clojure.string/join "- " $)))]
+        historico-selecionado (when historico (-> historico
+                                                (nth idx-selecionado)
+                                                (clojure.string/split #"- ")
+                                                (rest)
+                                                (as-> h (clojure.string/join "- " h))
+                                                (or "")))]
     [:<>
      [titulo-farmaco nome]
      ;; TODO: Colocar essa lógica do "and" num único reg-sub quando for
@@ -267,19 +268,32 @@
          [prescricao-hoje-line
           {:prescricao-de-hoje prescricao-de-hoje
            :nome nome}]
+
        ((<sub [::on-focus?]) nome)
-         [:<>
-          (when historico
-            [historico-farmaco
-             {:historico historico
-              :nome nome}])
-          [input-field
-           {:prescricao-de-hoje prescricao-de-hoje
-            :nome nome
-            :historico-selecionado historico-selecionado}
-           [farmaco-button
-            {}
-            "Ok"]]]
+       [:<>
+        (when historico
+          [historico-farmaco
+           {:historico historico
+            :nome nome}])
+        [input-field
+         {:prescricao-de-hoje prescricao-de-hoje
+          :nome nome
+          :historico-selecionado historico-selecionado}
+         [farmaco-button
+          {}
+          "Ok"]]]
+
+       (empty? historico-selecionado)
+       [:<>
+        (when historico
+          [historico-farmaco
+           {:historico historico
+            :nome nome}])
+        [input-field
+         {:prescricao-de-hoje prescricao-de-hoje
+          :nome nome
+          :historico-selecionado historico-selecionado}]]
+
        :else
          [:<>
           (when historico

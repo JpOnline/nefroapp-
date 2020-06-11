@@ -12,23 +12,19 @@
     [clojure.string :as str]
     ))
 
-(defn receita-padrao []
+(def farmacos-padrao
+  ["Eritropoetina"
+   "Hidróxido de Ferro"
+   "Calcijex"
+   "Sevelamer (Renagel)"
+   "Calcitriol"
+   "Cinacalcete"
+   "Paricalcitol"])
+
+(defn receita-padrao [farmacos-list]
   {:criada-em (util/today)
    :editada-em (util/today)
-   :farmacos {"Tempo" {:prescricao ""},
-              "Fluxo de Sangue" {:prescricao ""}
-              "Fluxo de Dialisato" {:prescricao ""}
-              "Acesso Vascular" {:prescricao ""}
-              "Capilar" {:prescricao ""}
-              "Peso Seco" {:prescricao ""}
-              "KCL" {:prescricao ""}
-              "Ca" {:prescricao ""}
-              "Glicose" {:prescricao ""}
-              "Na" {:prescricao ""}
-              "BIC" {:prescricao ""}
-              "Temperatura" {:prescricao ""}
-              "Heparina" {:prescricao ""}
-              "UF Máxima" {:prescricao ""}}})
+   :farmacos (zipmap farmacos-list (repeat {:prescricao ""}))})
 
 (defn-traced novo-paciente
   [app-state]
@@ -37,14 +33,15 @@
         pacientes-keys (keys (get-in app-state [:domain :pacientes]))
         next-id (if (empty? pacientes-keys)
                   -1 ;; Se começar do zero o firebase vai resgatar o valor como array e não como map.
-                  (inc (apply max pacientes-keys)))]
+                  (dec (apply min pacientes-keys)))
+        farmacos-list (get-in app-state [:domain :farmacos-padrao] farmacos-padrao)]
     (if (empty? trimmed-nome)
       app-state
       (-> app-state
           (assoc-in [:domain :pacientes next-id]
                     {:id next-id
                      :nome trimmed-nome
-                     :receitas (list (receita-padrao))})
+                     :receitas (list (receita-padrao farmacos-list))})
           (assoc-in [:ui :screen-state] "receita")
           (assoc-in [:ui :paciente-selecionado] next-id)
           (assoc-in [:ui :actions-menu :opened?] false)
