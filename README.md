@@ -1,8 +1,8 @@
 # Nefroapp
 
-Bem vindo meu amigo (Renan, Pedro, são vcs aí?). Esse é o maravilhoso projeto NefroApp. A ideia inicial é facilitar a vida do Nefrologista Rodrigo em prescrever medicamentos para seus pacientes.
+A ideia inicial é facilitar a vida do nefrologista em prescrever medicamentos para seus pacientes.
 
-Esse incrível projeto usa a linguagem de programação [Clojurescript](https://clojurescript.org), se quem quer que esteja lendo isso precisa manter esse projeto e não conhece Clojure, você vai ter que aprender, mas não se preocupe, é uma ótima linguagem.
+Esse projeto usa a linguagem de programação [Clojurescript](https://clojurescript.org), se quem quer que esteja lendo isso precisa manter esse projeto e não conhece Clojure, você vai ter que aprender, mas não se preocupe, é uma ótima linguagem.
 
 Aqui estão alguns recursos para aprender Clojure e seu ambiente:
 - [Clojure for the Brave and True](https://www.braveclojure.com/clojure-for-the-brave-and-true/) - Um livro focado para iniciantes, de graça e online.
@@ -15,7 +15,7 @@ Esse projeto também usa [Re-Frame](https://github.com/Day8/re-frame#derived-val
 
 ## Essential Command Lines
 
-`npm install` - Need when running the code for the first time. It install node packages dependencies.
+`npm install` - Needed when running the code for the first time. It install node packages dependencies.
 
 `npx webpack --mode=development` - Need when running the code for the first time. Bundle the external javascript code into the index.bundle.js.
 
